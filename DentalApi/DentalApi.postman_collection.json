@@ -1,0 +1,48 @@
+{
+  "info": {
+    "name": "DentalApi - CRUD Pacientes",
+    "description": "Pruebas secuenciales de listar, crear, consultar, actualizar y eliminar pacientes. Ejecutar toda la colección con Collection Runner.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5180" },
+    { "key": "pacienteId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Listar pacientes",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/pacientes" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Responde 200', function () { pm.response.to.have.status(200); });", "pm.test('Devuelve una lista JSON', function () { pm.expect(pm.response.json()).to.be.an('array'); });"] } }]
+    },
+    {
+      "name": "2. Crear paciente de prueba",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Paciente Postman\",\n  \"documento\": \"PM-{{$guid}}\",\n  \"telefono\": \"+573001234567\",\n  \"correo\": \"postman@example.com\",\n  \"notas\": \"Registro temporal para validar el CRUD\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{baseUrl}}/api/pacientes"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Crea el paciente y responde 201', function () { pm.response.to.have.status(201); });", "const paciente = pm.response.json();", "pm.expect(paciente.id).to.be.a('number');", "pm.collectionVariables.set('pacienteId', paciente.id);"] } }]
+    },
+    {
+      "name": "3. Consultar paciente creado",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/pacientes/{{pacienteId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Encuentra el paciente creado', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('pacienteId'))); });"] } }]
+    },
+    {
+      "name": "4. Actualizar paciente",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Paciente Postman Actualizado\",\n  \"documento\": \"PM-{{$guid}}\",\n  \"telefono\": \"+573009876543\",\n  \"correo\": \"postman.actualizado@example.com\",\n  \"notas\": \"Actualizado por la colección Postman\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{baseUrl}}/api/pacientes/{{pacienteId}}"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Actualiza y responde 204', function () { pm.response.to.have.status(204); });"] } }]
+    },
+    {
+      "name": "5. Eliminar paciente de prueba",
+      "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/pacientes/{{pacienteId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Elimina y responde 204', function () { pm.response.to.have.status(204); });", "pm.collectionVariables.unset('pacienteId');"] } }]
+    }
+  ]
+}
